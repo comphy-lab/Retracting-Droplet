@@ -3,18 +3,17 @@
 # vatsalsanjay@gmail.com
 # Physics of Fluids
 */
-#include "navier-stokes/centered.h"
-#define FILTERED
-#include "two-phase.h"
-#include "navier-stokes/conserving.h"
-#include "tension.h"
-#include "axi.h"
-#include "reduced.h"
+
+#include "utils.h"
+#include "output.h"
 
 char filename[80];
 int nx, ny, len;
 double xmin, ymin, xmax, ymax, Deltax, Deltay, mu1, mu2, rho1, rho2;
+scalar f[];
+vector u[];
 scalar D2c[], vel[], mom[];
+vector h[];
 scalar * list = NULL;
 
 int main(int a, char const *arguments[])
@@ -24,7 +23,6 @@ int main(int a, char const *arguments[])
   xmax = atof(arguments[4]); ymax = atof(arguments[5]);
   ny = atoi(arguments[6]);
   
-
   // fprintf(ferr, "xmin %g, ymin %g, xmax %g, ymax %g, ny %d\n", xmin, ymin, xmax, ymax, ny);
 
   list = list_add (list, D2c);
@@ -36,10 +34,6 @@ int main(int a, char const *arguments[])
 
   rho1 = 1e0;
   rho2 = 1e-3;
-
-  // boundary conditions
-  // f[left] = dirichlet(1.0);
-  // u.t[left] = dirichlet(0.0);
 
   /*
   Actual run and codes!
