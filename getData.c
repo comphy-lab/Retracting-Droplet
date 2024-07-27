@@ -3,19 +3,15 @@
 # vatsalsanjay@gmail.com
 # Physics of Fluids
 */
-#include "axi.h"
-#include "navier-stokes/centered.h"
-#define FILTERED
-#include "src-local/contact-fixed.h"
-#include "two-phase.h"
-#include "navier-stokes/conserving.h"
-#include "tension.h"
-#include "reduced.h"
+
+#include "utils.h"
+#include "output.h"
 
 char filename[80];
 int nx, ny, len;
 double xmin, ymin, xmax, ymax, Deltax, Deltay, mu1, mu2, rho1, rho2;
-double thetaA = 60.0*pi/180.0, thetaR = 40.0*pi/180.0;
+scalar f[];
+vector u[];
 scalar D2c[], vel[], mom[];
 vector h[];
 scalar * list = NULL;
@@ -42,28 +38,6 @@ int main(int a, char const *arguments[])
 
   rho1 = 1e0;
   rho2 = 1e-3;
-
-  f.height = h;
-
-  // boundary conditions
-  u.t[top] = neumann(0.);
-  uf.t[top] = neumann(0.);
-  u.n[top] = neumann(0.);
-  uf.n[top] = neumann(0.);
-  p[top] = dirichlet(0.);
-
-  u.t[right] = neumann(0.);
-  uf.t[right] = neumann(0.);
-  u.n[right] = neumann(0.);
-  uf.n[right] = neumann(0.);
-  p[right] = dirichlet(0.);
-
-  u.t[left] = dirichlet(0.);
-  uf.t[left] = dirichlet(0.);
-  u.n[left] = dirichlet(0.);
-  uf.n[left] = dirichlet(0.);
-  p[left] = neumann(0.);
-  h.t[left] = contact_angle(contact_angle_tanh(u.y[], thetaA, thetaR, 0.1));
 
   /*
   Actual run and codes!
