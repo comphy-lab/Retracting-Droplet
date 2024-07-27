@@ -81,7 +81,7 @@ nr = 256
 rmin, rmax, zmin, zmax = [0.0, Ldomain, 0.0, Ldomain]
 lw = 4
 
-folder = 'hysteresis_test_fixed'  # output folder
+folder = 'Video_retract_v1'  # output folder
 
 if not os.path.isdir(folder):
     os.makedirs(folder)
@@ -92,7 +92,7 @@ for ti in range(nGFS):
     t = ti*(1e-2)
     print("Time is %f" % t)
 
-    place = "test_hysteresis_fixed/snapshot-%5.4f" % t
+    place = "TestCases/retract_v1/intermediate/snapshot-%5.4f" % t
     name = "%s/%8.8d.png" %(folder, int(t*1000000))
 
     if not os.path.exists(place):
@@ -119,7 +119,7 @@ for ti in range(nGFS):
                 ax.add_collection(line_segments)
 
                 ## D
-                cntrl1 = ax.imshow(D2, cmap="hot_r", interpolation='None', origin='lower', extent=[rminp, rmaxp, zminp, zmaxp], vmax = -1.0, vmin = -3.0)
+                cntrl1 = ax.imshow(D2, cmap="hot_r", interpolation='None', origin='lower', extent=[rminp, rmaxp, zminp, zmaxp], vmax = 1.0, vmin = -3.0)
                 ## V
                 cntrl2 = ax.imshow(mom, interpolation='None', cmap="Blues", origin='lower', extent=[-rminp, -rmaxp, zminp, zmaxp], vmax = 1e0, vmin = 0.)
 
