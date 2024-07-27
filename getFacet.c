@@ -8,16 +8,16 @@
 #include "output.h"
 #include "fractions.h"
 
-double thetaA = 60.0*pi/180.0, thetaR = 40.0*pi/180.0;
 
-// scalar f[];
-vector h[];
+scalar f[];
 char filename[80];
+
 
 int main(int a, char const *arguments[])
 {
   sprintf (filename, "%s", arguments[1]);
   restore (file = filename);
+
   FILE * fp = ferr;
   output_facets(f,fp);
   fflush (fp);
