@@ -16,6 +16,10 @@ scalar D2c[], vel[], mom[];
 vector h[];
 scalar * list = NULL;
 
+double contact_angle_tanh(double u, double thetaA, double thetaB, double width) {
+    return thetaA + 0.5 * (thetaB - thetaA) * (1 + tanh(u / width));
+}
+
 int main(int a, char const *arguments[])
 {
   sprintf (filename, "%s", arguments[1]);

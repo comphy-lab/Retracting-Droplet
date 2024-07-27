@@ -8,7 +8,10 @@
 #include "output.h"
 #include "fractions.h"
 
-scalar f[];
+double thetaA = 60.0*pi/180.0, thetaR = 40.0*pi/180.0;
+
+// scalar f[];
+vector h[];
 char filename[80];
 
 int main(int a, char const *arguments[])
