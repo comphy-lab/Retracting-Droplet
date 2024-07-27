@@ -1,9 +1,10 @@
 /** Title: Drop retraction
  * Initial condition: a pancake shaped drop of heigh h0.
+ * using a tanh transition function
 # Author: Aman Bhargava & Vatsal Sanjay
 # Physics of Fluids
 # Last Updated: Jul 27, 2024
-version 0.0
+version 1.0
 */
 
 #include "axi.h"
@@ -50,12 +51,16 @@ u.n[left] = dirichlet(0.);
 uf.n[left] = dirichlet(0.);
 p[left] = neumann(0.);
 
-double Oh1, Oh2, Bo, Gamma, Ldomain, DeltaMin, theta0 = 25.0*pi/180.0, thetaA = 60.0*pi/180.0, thetaR = 40.0*pi/180.0, ymax;
+double Oh1, Oh2, Bo, Gamma, Ldomain, DeltaMin, thetaA = 60.0*pi/180.0, thetaR = 40.0*pi/180.0;
 int MAXlevel;
+
+double contact_angle_tanh(double u, double thetaA, double thetaB, double width) {
+    return thetaA + 0.5 * (thetaB - thetaA) * (1 + tanh(u / width));
+}
 
 vector h[];
 // h.t[left] = contact_angle((u.y[0,0] > 0.0001) ? thetaA : (u.y[0,0] < -0.0001) ? thetaR : (thetaA + thetaR)/2);
-h.t[left] = contact_angle((u.y[0,0] > 0.0001) ? thetaA : thetaR);
+// h.t[left] = contact_angle((u.y[0,0] > 0.0001) ? thetaA : thetaR);
 
 int main(int argc, char const *argv[]) {
 
@@ -106,7 +111,12 @@ event init(t = 0){
     fraction(f, y > Gamma-h0 ? h0-sqrt((sq(x)+sq(y-(Gamma-h0)))) : h0-x); //pancake
     // fraction(f, y < Gamma*sqrt((1-sq(x/h0)))); //ellipse
 
+    h.t[left] = contact_angle(contact_angle_tanh(0.0, thetaA, thetaR, 0.1));
   }
+}
+
+event properties(i++){
+  h.t[left] = contact_angle(contact_angle_tanh(u.y[], thetaA, thetaR, 0.1));
 }
 
 scalar KAPPA[];
