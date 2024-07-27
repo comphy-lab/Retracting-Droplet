@@ -22,3 +22,8 @@ Video_retract_v1/
 TestCases/retract
 TestCases/retract_v1
 TestCases/src-local
+
+*.mp4
+*/*.mp4
+*/*/mp4
+*/*/*/mp4

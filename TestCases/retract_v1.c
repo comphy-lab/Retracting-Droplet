@@ -18,7 +18,7 @@ version 1.0
 
 //
 
-#define tmax 100.0                                                 // maximum time
+#define tmax 100.0                                    // maximum time
 
 #define tsnap1 (1e-2)
 #define tsnap2 (1e-3)
