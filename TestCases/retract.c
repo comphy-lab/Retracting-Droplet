@@ -66,7 +66,7 @@ int main(int argc, char const *argv[]) {
 
   // H = 1.79*pow(3*Gamma*Gamma+1, -1.0/3.0)*1e-3;
   Ldomain = Gamma+3;
-  MAXlevel = 9;
+  MAXlevel = 11;
 
   //Gamma = atof(argv[1]);
   //Ldomain = atof(argv[2]);

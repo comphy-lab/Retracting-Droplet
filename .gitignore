@@ -30,3 +30,9 @@ TestCases/src-local
 
 getData
 getFacet
+getInterfaceAndAngle
+
+Interface
+interfaceAndAngle
+
+*.csv
