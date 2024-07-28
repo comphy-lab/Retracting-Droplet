@@ -41,6 +41,7 @@ interfaceAndAngle
 
 
 */*.c.tags* 
-*/.s* 
+*/*.s*
 */*.deps 
 */*.tests
+*/*.tst
