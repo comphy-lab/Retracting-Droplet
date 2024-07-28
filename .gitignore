@@ -36,3 +36,9 @@ Interface
 interfaceAndAngle
 
 *.csv
+
+
+*/*.c.tags* 
+*/.s* 
+*/*.deps 
+*/*.tests
