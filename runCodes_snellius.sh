@@ -1,9 +1,10 @@
 #!/bin/bash
 
 #SBATCH -N 1
-#SBATCH --ntasks=192
+#SBATCH --partition=genoa
+#SBATCH --ntasks-per-node=192
 #SBATCH --job-name=retracting_droplet_1st_sweep
-#SBATCH --time=24:00:00
+#SBATCH --time=72:00:00
 #SBATCH --mail-type=ALL
 #SBATCH --error=job.%J.err
 #SBATCH --output=job.%J.out
@@ -12,13 +13,13 @@
 
 MAXlevel="11"
 
-Bo = ( "0" "1e0" )
+Bo=( "0" "1.0" )
 
-Oh = ( "1e-2" "1e-1" "1e0" )
+Oh=( "1E-2" "1E-1" "1.0" )
 
-Gamma = ( "4.0" "8.0" "16.0" )
+Gamma=( "4.0" "8.0" "16.0" )
 
-theta = ( "30.0" "90.0" "150.0" )
+theta=( "30.0" "90.0" "150.0" )
 
 start=0
 
@@ -33,7 +34,7 @@ for i in "${Bo[@]}"; do
             for k in "${Gamma[@]}"; do
                 for l in "${theta[@]}"; do
                     cd $dir
-                    srun -n 192 --gres=cpu:8 --exclusive retract_1st_sweep $MAXlevel ${Bo[i]} ${Oh[j]} ${Gamma[k]} ${theta[l]} & 
+                    srun -n 192 --gres=cpu:8 --exclusive retract_1st_sweep $MAXlevel $i $j $k $l & 
                     cd ../
                 done
             done
