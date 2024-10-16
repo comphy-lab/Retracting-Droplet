@@ -3,8 +3,14 @@
  * using a constant angle equal to thetaR
 # Author: Aman Bhargava & Vatsal Sanjay
 # Physics of Fluids
-# Last Updated: Jul 27, 2024
-version 1.0
+# Last Updated: Oct 16, 2024
+version 1.2
+
+# changelog Oct 13, 2024
+- added error checking for blowups and slow evolution
+
+# changelog Oct 16, 2024
+- discoverer HPC does not quit with only assert statements. so added a return statement to quit for sure. 
 */
 
 #include "axi.h"
@@ -51,7 +57,7 @@ uf.n[left] = dirichlet(0.);
 p[left] = neumann(0.);
 
 double Oh1, Oh2, Bo, Gamma, Ldomain, DeltaMin, theta;
-int MAXlevel;
+int MAXlevel, counter;
 
 vector h[];
 h.t[left] = contact_angle(theta);
@@ -63,11 +69,12 @@ int main(int argc, char const *argv[]) {
   Oh1 = atof(argv[3]);
   Gamma = atof(argv[4]);
   theta = atof(argv[5])*pi/180.0;
+  counter = atoi(argv[6]);
  
   Oh2 = Oh1*MuR;
 
   // H = 1.79*pow(3*Gamma*Gamma+1, -1.0/3.0)*1e-3;
-  Ldomain = Gamma+10;
+  Ldomain = 0.5*Gamma+10;
 
 
 
@@ -76,7 +83,8 @@ int main(int argc, char const *argv[]) {
   init_grid (1 << (MAXlevel));
 
   char comm[80];
-  sprintf (comm, "mkdir -p Oh_%3.2e_Bo_%3.2e_Gamma_%3.2e_theta_%3.2e_level_%d", Oh1, Bo, Gamma, theta, MAXlevel);
+  // sprintf (comm, "mkdir -p Oh_%3.2e_Bo_%3.2e_Gamma_%3.2e_theta_%3.2e_level_%d", Oh1, Bo, Gamma, theta, MAXlevel);
+  sprintf (comm, "mkdir -p %03d", counter);
   system(comm);
 
   rho1 = 1e0; mu1 = Oh1;
@@ -89,7 +97,7 @@ int main(int argc, char const *argv[]) {
   
   DeltaMin = L0/pow(2,MAXlevel);
 
-  fprintf(ferr, "Level %d tmax %g. Ohf %3.2e, Gamma %g, Bo %3.2e, L0 %g, MaxLevel %d\n", MAXlevel, tmax, Oh1, Gamma, Bo, L0, MAXlevel);
+  fprintf(ferr, "Level %d tmax %g. Ohf %3.2e, Gamma %g, Bo %3.2e, L0 %g, Theta %g\n", MAXlevel, tmax, Oh1, Gamma, Bo, L0, theta);
   run();
 
 }
@@ -98,13 +106,14 @@ int main(int argc, char const *argv[]) {
 
 event init(t = 0){
   char filename[80];
-  sprintf(filename, "dump_Oh_%3.2e_Bo_%3.2e_Gamma_%3.2e_theta_%3.2e_level_%d", Oh1, Bo, Gamma, theta, MAXlevel);
+  // sprintf(filename, "dump_Oh_%3.2e_Bo_%3.2e_Gamma_%3.2e_theta_%3.2e_level_%d", Oh1, Bo, Gamma, theta, MAXlevel);
+  sprintf(filename, "dump_%03d", counter);
   if(!restore (file = filename)){
     /**
     We can now initialize the volume fractions in the domain. */
-    refine(y<Gamma && x < h0 + 10*DeltaMin && level<MAXlevel);
+    refine(y<Gamma/2 && x < h0 + 10*DeltaMin && level<MAXlevel);
 
-    fraction(f, y > Gamma-h0 ? h0-sqrt((sq(x)+sq(y-(Gamma-h0)))) : h0-x); //pancake
+    fraction(f, y > (0.5*Gamma)-h0 ? h0-sqrt((sq(x)+sq(y-(0.5*Gamma-h0)))) : h0-x); //pancake
     // fraction(f, y < Gamma*sqrt((1-sq(x/h0)))); //ellipse
   }
 }
@@ -120,31 +129,45 @@ event adapt(i++) {
 // Outputs
 event writingFiles (t = 0; t += tsnap1; t <= tmax + tsnap1) {
   char filename[80];
-  sprintf(filename, "dump_Oh_%3.2e_Bo_%3.2e_Gamma_%3.2e_theta_%3.2e_level_%d", Oh1, Bo, Gamma, theta, MAXlevel);
+  // sprintf(filename, "dump_Oh_%3.2e_Bo_%3.2e_Gamma_%3.2e_theta_%3.2e_level_%d", Oh1, Bo, Gamma, theta, MAXlevel);
+  sprintf(filename, "dump_%03d", counter);
   dump (file = filename);
   char nameOut[80];
-  sprintf (nameOut, "Oh_%3.2e_Bo_%3.2e_Gamma_%3.2e_theta_%3.2e_level_%d", Oh1, Bo, Gamma, theta, MAXlevel);
+  sprintf (nameOut, "%03d/snapshot-%5.4f", counter, t);
   dump (file = nameOut);
 }
 
 event logWriting (t = 0; t += tsnap2; t <= tmax + tsnap1) {
 
   double ke = 0.;
+  
   foreach (reduction(+:ke)){
     ke += sq(Delta)*(sq(u.x[]) + sq(u.y[]))*rho(f[]);
   }
-  static FILE * fp;
-  if (i == 0) {
-    fprintf (ferr, "i dt t ke\n");
-    fp = fopen ("log", "w");
-    fprintf (fp, "i dt t ke\n");
-    fprintf (fp, "%d %g %g %g\n", i, dt, t, ke);
-    fclose(fp);
-  } else {
+
+  if (pid() == 0) {
+    static FILE * fp;
+    if (i == 0) {
+      fprintf (ferr, "i dt t ke\n");
+      fp = fopen ("log", "w");
+      fprintf (fp, "i dt t ke\n");
+      fprintf (fp, "%d %g %g %g\n", i, dt, t, ke);
+      fclose(fp);
+    } else {
     fp = fopen ("log", "a");
     fprintf (fp, "%d %g %g %g\n", i, dt, t, ke);
-    fclose(fp);
+      fclose(fp);
+    }
+    fprintf (ferr, "%d %g %g %g\n", i, dt, t, ke);
   }
-  fprintf (ferr, "%d %g %g %g\n", i, dt, t, ke);
+
+  // these are to catch blowups!
+  if (ke > -1e-10) return 1;
+  if (ke < 1e3) return 1;
+
+  // if the system is very slowly evolving.. stop
+  if (i > 100){
+    if (ke < 1e-6) return 1;
+  }
 
 }
