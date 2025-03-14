@@ -131,10 +131,10 @@ def process_timestep(ti, folder, nGFS, GridsPerR, rmin, rmax, zmin, zmax, lw):
         line_segments = LineCollection(segs, linewidths=4, colors='black', linestyle='solid')
         ax.add_collection(line_segments)
 
-        # ## Dissipation
-        # cntrl1 = ax.imshow(D2, cmap="hot_r", interpolation='None', origin='lower', extent=[rminp, rmaxp, zminp, zmaxp], vmax = -1.0, vmin = -3.0)
-        # ## Momentum
-        # cntrl2 = ax.imshow(mom, interpolation='None', cmap="Blues", origin='lower', extent=[-rminp, -rmaxp, zminp, zmaxp], vmax = 1e0, vmin = 0.)
+        ## Dissipation
+        cntrl1 = ax.imshow(D2, cmap="hot_r", interpolation='None', origin='lower', extent=[rminp, rmaxp, zminp, zmaxp], vmax = -1.0, vmin = -3.0)
+        ## Momentum
+        cntrl2 = ax.imshow(mom, interpolation='None', cmap="Blues", origin='lower', extent=[-rminp, -rmaxp, zminp, zmaxp], vmax = 1e0, vmin = 0.)
         
         n = 3  # Adjust this value to control the density
         R_reduced = R[::n, ::n]
@@ -144,18 +144,14 @@ def process_timestep(ti, folder, nGFS, GridsPerR, rmin, rmax, zmin, zmax, lw):
 
         magnitude = np.sqrt(momx_reduced**2 + momy_reduced**2)
 
-        # Define a threshold for the minimum magnitude
-        threshold = 0.01  # Adjust this value as needed
-
-        # Create a mask to filter out vectors with magnitudes below the threshold
-        mask = magnitude > threshold
+        mask = magnitude > 0.01
 
         R_filtered = R_reduced[mask]
         Z_filtered = Z_reduced[mask]
         momx_filtered = momx_reduced[mask]
         momy_filtered = momy_reduced[mask]
 
-        # Plot vectors with reduced density
+        # Plot vectors
         ax.quiver(-R_filtered, Z_filtered, -momy_filtered, momx_filtered, color='#1F77B4', scale=10, headwidth=3, headlength=4, headaxislength=4, width=0.002)
         ax.quiver(R_filtered, Z_filtered, momy_filtered, momx_filtered, color='#1F77B4', scale=10, headwidth=3, headlength=4, headaxislength=4, width=0.002)     
         # ax.quiver(R, Z, ux, uy, color='black', scale=1000)
